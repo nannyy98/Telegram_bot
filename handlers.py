@@ -436,6 +436,41 @@ class MessageHandler:
         else:
             self.bot.send_message(chat_id, "❌ Категории товаров не найдены")
     
+    def _show_subcategories(self, chat_id, category_id, category_name):
+        """Показ подкатегорий или товаров категории"""
+        try:
+            subcategories = self.db.get_products_by_category(category_id)
+        except Exception as e:
+            logger.error(f"Ошибка получения подкатегорий: {e}")
+            self.bot.send_message(chat_id, "❌ Ошибка загрузки категории")
+            return
+        
+        if subcategories and len(subcategories) > 0:
+            # Показываем подкатегории/бренды
+            subcategories_text = f"📂 <b>Выберите бренд в категории '{category_name}':</b>"
+            keyboard = create_subcategories_keyboard(subcategories)
+            self.bot.send_message(chat_id, subcategories_text, keyboard)
+        else:
+            # Показываем товары напрямую
+            try:
+                products = self.db.execute_query('''
+                    SELECT * FROM products 
+                    WHERE category_id = ? AND is_active = 1 
+                    ORDER BY name 
+                    LIMIT 10
+                ''', (category_id,))
+            except Exception as e:
+                logger.error(f"Ошибка получения товаров: {e}")
+                self.bot.send_message(chat_id, "❌ Ошибка загрузки товаров")
+                return
+            
+            if products:
+                products_text = f"🛍 <b>Товары в категории '{category_name}':</b>"
+                keyboard = create_products_keyboard(products)
+                self.bot.send_message(chat_id, products_text, keyboard)
+            else:
+                self.bot.send_message(chat_id, f"❌ В категории '{category_name}' нет товаров")
+    
     def _show_cart(self, chat_id, telegram_id):
         """Показ корзины"""
         user_data = self.db.get_user_by_telegram_id(telegram_id)
@@ -554,32 +589,6 @@ class MessageHandler:
         }
         
         self.bot.send_message(chat_id, profile_text, keyboard)
-    
-    def _handle_category_selection(self, message):
-        """Обработка выбора категории"""
-        chat_id = message['chat']['id']
-        telegram_id = message['from']['id']
-        text = message.get('text', '')
-        
-        # Извлекаем название категории из текста кнопки
-        if ' ' in text:
-            category_name = text.split(' ', 1)[1]
-        else:
-            category_name = text
-        
-        # Находим категорию в базе данных
-        categories = self.db.get_categories()
-        selected_category = None
-        
-        for category in categories:
-            if category[1] == category_name:
-                selected_category = category
-                break
-        
-        if selected_category:
-            self._show_subcategories(chat_id, selected_category[0], selected_category[1])
-        else:
-            self.bot.send_message(chat_id, "❌ Категория не найдена")
     
     def _handle_add_to_cart_callback(self, callback_query):
         """Обработка добавления в корзину"""
