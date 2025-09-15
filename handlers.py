@@ -283,6 +283,34 @@ class MessageHandler:
         else:
             self._handle_unknown_text(message)
     
+    def _handle_product_selection(self, message):
+        """Обработка выбора товара"""
+        chat_id = message['chat']['id']
+        telegram_id = message['from']['id']
+        text = message.get('text', '')
+        
+        try:
+            # Извлекаем название и цену товара
+            # Формат: "🛍 Название товара - $цена"
+            if ' - $' in text:
+                product_name = text.split(' - $')[0].replace('🛍 ', '')
+                
+                # Находим товар в базе
+                product = self.db.execute_query(
+                    'SELECT * FROM products WHERE name = ? AND is_active = 1',
+                    (product_name,)
+                )
+                
+                if product:
+                    self._show_product_details(chat_id, product[0])
+                else:
+                    self.bot.send_message(chat_id, "❌ Товар не найден")
+            else:
+                self.bot.send_message(chat_id, "❌ Неверный формат выбора товара")
+        except Exception as e:
+            logger.error(f"Ошибка выбора товара: {e}")
+            self.bot.send_message(chat_id, "❌ Ошибка обработки товара")
+    
     def _process_registration_name(self, message):
         """Обработка ввода имени при регистрации"""
         chat_id = message['chat']['id']
@@ -435,41 +463,6 @@ class MessageHandler:
             self.bot.send_message(chat_id, categories_text, keyboard)
         else:
             self.bot.send_message(chat_id, "❌ Категории товаров не найдены")
-    
-    def _show_subcategories(self, chat_id, category_id, category_name):
-        """Показ подкатегорий или товаров категории"""
-        try:
-            subcategories = self.db.get_products_by_category(category_id)
-        except Exception as e:
-            logger.error(f"Ошибка получения подкатегорий: {e}")
-            self.bot.send_message(chat_id, "❌ Ошибка загрузки категории")
-            return
-        
-        if subcategories and len(subcategories) > 0:
-            # Показываем подкатегории/бренды
-            subcategories_text = f"📂 <b>Выберите бренд в категории '{category_name}':</b>"
-            keyboard = create_subcategories_keyboard(subcategories)
-            self.bot.send_message(chat_id, subcategories_text, keyboard)
-        else:
-            # Показываем товары напрямую
-            try:
-                products = self.db.execute_query('''
-                    SELECT * FROM products 
-                    WHERE category_id = ? AND is_active = 1 
-                    ORDER BY name 
-                    LIMIT 10
-                ''', (category_id,))
-            except Exception as e:
-                logger.error(f"Ошибка получения товаров: {e}")
-                self.bot.send_message(chat_id, "❌ Ошибка загрузки товаров")
-                return
-            
-            if products:
-                products_text = f"🛍 <b>Товары в категории '{category_name}':</b>"
-                keyboard = create_products_keyboard(products)
-                self.bot.send_message(chat_id, products_text, keyboard)
-            else:
-                self.bot.send_message(chat_id, f"❌ В категории '{category_name}' нет товаров")
     
     def _show_cart(self, chat_id, telegram_id):
         """Показ корзины"""
