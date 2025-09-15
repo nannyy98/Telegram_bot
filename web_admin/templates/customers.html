@@ -147,12 +147,14 @@
                         </td>
                         <td>
                             {% if customer[7] %}
-                                {% set days_ago = ((today_stats[0] if today_stats else 0) - customer[7][:10]|length) %}
-                                {% if customer[7] >= (now - timedelta(days=7)).strftime('%Y-%m-%d') %}
+                                {% set last_order_date = customer[7][:10] %}
+                                {% set week_ago = (now - timedelta(days=7)).strftime('%Y-%m-%d') %}
+                                {% set month_ago = (now - timedelta(days=30)).strftime('%Y-%m-%d') %}
+                                {% if last_order_date >= week_ago %}
                                     <span class="badge bg-success">
                                         <i class="fas fa-fire me-1"></i>Активный
                                     </span>
-                                {% elif customer[7] >= (now - timedelta(days=30)).strftime('%Y-%m-%d') %}
+                                {% elif last_order_date >= month_ago %}
                                     <span class="badge bg-warning">
                                         <i class="fas fa-clock me-1"></i>Умеренный
                                     </span>

@@ -118,9 +118,13 @@
                                 <span class="badge bg-primary">
                                     <i class="fas fa-credit-card me-1"></i>Онлайн
                                 </span>
-                            {% else %}
+                            {% elif order[8] == 'cash' %}
                                 <span class="badge bg-warning">
                                     <i class="fas fa-money-bill me-1"></i>Наличные
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-question me-1"></i>{{ order[8] or 'Не указано' }}
                                 </span>
                             {% endif %}
                         </td>

@@ -382,23 +382,31 @@ function refreshDashboard() {
     }, 1000);
 }
 
-function testTelegramConnection() {
+function testTelegramConnection(button) {
+    showLoading(button);
+    
     fetch('/api/test_telegram')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('✅ Связь с Telegram работает!\n\nБот: ' + data.bot_name);
+                showAlert('success', '✅ Связь с Telegram работает!', `Бот: ${data.bot_name}\nСтатус: ${data.status}`);
             } else {
-                alert('❌ Ошибка связи с Telegram:\n' + data.error);
+                showAlert('error', '❌ Ошибка связи с Telegram', data.error);
             }
         })
         .catch(error => {
-            alert('❌ Ошибка проверки связи');
+            showAlert('error', '❌ Ошибка проверки связи', 'Проверьте подключение к интернету');
+        })
+        .finally(() => {
+            button.innerHTML = '<i class="fas fa-wifi fa-2x mb-2 text-success"></i><div class="fw-bold">Тест Telegram</div><small class="text-muted">Проверить связь с ботом</small>';
+            button.disabled = false;
         });
 }
 
-function sendTestMessage() {
+function sendTestMessage(button) {
     if (confirm('Отправить тестовое сообщение с изображением в канал?')) {
+        showLoading(button);
+        
         fetch('/test_channel_post', {
             method: 'POST',
             headers: {
@@ -407,15 +415,45 @@ function sendTestMessage() {
         })
         .then(response => {
             if (response.ok) {
-                alert('✅ Тестовое сообщение отправлено в канал!');
+                showAlert('success', '✅ Успешно!', 'Тестовое сообщение отправлено в канал');
             } else {
-                alert('❌ Ошибка отправки тестового сообщения');
+                showAlert('error', '❌ Ошибка', 'Не удалось отправить тестовое сообщение');
             }
         })
         .catch(error => {
-            alert('❌ Ошибка отправки');
+            showAlert('error', '❌ Ошибка отправки', 'Проверьте настройки канала');
+        })
+        .finally(() => {
+            button.innerHTML = '<i class="fas fa-broadcast-tower fa-2x mb-2 text-info"></i><div class="fw-bold">Тест канала</div><small class="text-muted">Отправить тест в канал</small>';
+            button.disabled = false;
         });
     }
+}
+
+// Красивые уведомления
+function showAlert(type, title, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            <i class="${icon} me-2"></i>
+            <strong>${title}</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Добавляем в начало content-area
+    const contentArea = document.querySelector('.content-area');
+    contentArea.insertAdjacentHTML('afterbegin', alertHtml);
+    
+    // Автоматически скрываем через 5 секунд
+    setTimeout(() => {
+        const alert = contentArea.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
 }
 </script>
 {% endblock %}

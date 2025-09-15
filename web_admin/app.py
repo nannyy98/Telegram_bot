@@ -13,15 +13,24 @@ import json
 # Добавляем путь к модулям бота
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from database import DatabaseManager
-from bot_integration import TelegramBotIntegration
+try:
+    from database import DatabaseManager
+    from bot_integration import TelegramBotIntegration
+except ImportError as e:
+    print(f"Ошибка импорта: {e}")
+    sys.exit(1)
 
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-change-in-production')
 
 # Инициализация
-db = DatabaseManager()
-telegram_bot = TelegramBotIntegration()
+try:
+    db = DatabaseManager()
+    telegram_bot = TelegramBotIntegration()
+except Exception as e:
+    print(f"Ошибка инициализации: {e}")
+    db = None
+    telegram_bot = None
 
 # Настройки загрузки файлов
 UPLOAD_FOLDER = 'static/uploads'
@@ -68,61 +77,78 @@ def login_required(f):
 @app.route('/')
 @login_required
 def dashboard():
+    if not db:
+        flash('База данных недоступна')
+        return render_template('error.html', error='Database connection failed')
+    
     # Статистика за сегодня
     today = datetime.now().strftime('%Y-%m-%d')
-    today_stats = db.execute_query('''
-        SELECT 
-            COUNT(*) as orders_today,
-            COALESCE(SUM(total_amount), 0) as revenue_today,
-            COUNT(DISTINCT user_id) as customers_today
-        FROM orders 
-        WHERE DATE(created_at) = ?
-    ''', (today,))
+    try:
+        today_stats = db.execute_query('''
+            SELECT 
+                COUNT(*) as orders_today,
+                COALESCE(SUM(total_amount), 0) as revenue_today,
+                COUNT(DISTINCT user_id) as customers_today
+            FROM orders 
+            WHERE DATE(created_at) = ?
+        ''', (today,))
+    except Exception as e:
+        flash(f'Ошибка получения статистики: {e}')
+        today_stats = [(0, 0, 0)]
     
     # Статистика за вчера
     yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    yesterday_stats = db.execute_query('''
-        SELECT 
-            COUNT(*) as orders_yesterday,
-            COALESCE(SUM(total_amount), 0) as revenue_yesterday
-        FROM orders 
-        WHERE DATE(created_at) = ?
-    ''', (yesterday,))
+    try:
+        yesterday_stats = db.execute_query('''
+            SELECT 
+                COUNT(*) as orders_yesterday,
+                COALESCE(SUM(total_amount), 0) as revenue_yesterday
+            FROM orders 
+            WHERE DATE(created_at) = ?
+        ''', (yesterday,))
+    except Exception as e:
+        yesterday_stats = [(0, 0)]
     
     # Общая статистика
-    total_stats = db.execute_query('''
-        SELECT 
-            COUNT(DISTINCT id) as total_customers,
-            COUNT(*) as total_orders,
-            COALESCE(SUM(total_amount), 0) as total_revenue
-        FROM (
-            SELECT u.id, o.total_amount FROM users u
-            LEFT JOIN orders o ON u.id = o.user_id AND o.status != 'cancelled'
-            WHERE u.is_admin = 0
-        )
-    ''')
+    try:
+        total_stats = db.execute_query('''
+            SELECT 
+                (SELECT COUNT(*) FROM users WHERE is_admin = 0) as total_customers,
+                COUNT(*) as total_orders,
+                COALESCE(SUM(total_amount), 0) as total_revenue
+            FROM orders 
+            WHERE status != 'cancelled'
+        ''')
+    except Exception as e:
+        total_stats = [(0, 0, 0)]
     
     # Последние заказы
-    recent_orders = db.execute_query('''
-        SELECT o.id, o.total_amount, o.status, o.created_at, u.name
-        FROM orders o
-        JOIN users u ON o.user_id = u.id
-        ORDER BY o.created_at DESC
-        LIMIT 10
-    ''')
+    try:
+        recent_orders = db.execute_query('''
+            SELECT o.id, o.total_amount, o.status, o.created_at, u.name
+            FROM orders o
+            JOIN users u ON o.user_id = u.id
+            ORDER BY o.created_at DESC
+            LIMIT 10
+        ''')
+    except Exception as e:
+        recent_orders = []
     
     # Топ товары за неделю
-    top_products = db.execute_query('''
-        SELECT p.name, SUM(oi.quantity) as sold, SUM(oi.quantity * oi.price) as revenue
-        FROM order_items oi
-        JOIN products p ON oi.product_id = p.id
-        JOIN orders o ON oi.order_id = o.id
-        WHERE o.created_at >= date('now', '-7 days')
-        AND o.status != 'cancelled'
-        GROUP BY p.id, p.name
-        ORDER BY revenue DESC
-        LIMIT 5
-    ''')
+    try:
+        top_products = db.execute_query('''
+            SELECT p.name, SUM(oi.quantity) as sold, SUM(oi.quantity * oi.price) as revenue
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            JOIN orders o ON oi.order_id = o.id
+            WHERE o.created_at >= datetime('now', '-7 days')
+            AND o.status != 'cancelled'
+            GROUP BY p.id, p.name
+            ORDER BY revenue DESC
+            LIMIT 5
+        ''')
+    except Exception as e:
+        top_products = []
     
     return render_template('dashboard.html',
                          today_stats=today_stats[0] if today_stats else (0, 0, 0),
@@ -230,13 +256,21 @@ def products():
 @app.route('/add_product', methods=['GET', 'POST'])
 @login_required
 def add_product():
+    if not db:
+        flash('База данных недоступна')
+        return redirect(url_for('dashboard'))
+    
     if request.method == 'POST':
-        name = request.form['name']
-        description = request.form.get('description', '')
-        price = float(request.form['price'])
-        cost_price = float(request.form.get('cost_price', 0))
-        category_id = int(request.form['category_id'])
-        stock = int(request.form['stock'])
+        try:
+            name = request.form['name']
+            description = request.form.get('description', '')
+            price = float(request.form['price'])
+            cost_price = float(request.form.get('cost_price', 0))
+            category_id = int(request.form['category_id'])
+            stock = int(request.form['stock'])
+        except (ValueError, KeyError) as e:
+            flash(f'Ошибка в данных формы: {e}')
+            return redirect(url_for('add_product'))
         
         # Обработка изображения
         image_url = ''
@@ -1063,6 +1097,103 @@ def export_products():
 def export_customers():
     flash('Экспорт клиентов будет добавлен в следующей версии')
     return redirect(url_for('customers'))
+
+# Обработчик ошибок
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('error.html', 
+                         error='Страница не найдена',
+                         error_code=404), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('error.html', 
+                         error='Внутренняя ошибка сервера',
+                         error_code=500), 500
+
+@app.route('/edit_product/<int:product_id>', methods=['GET', 'POST'])
+@login_required
+def edit_product(product_id):
+    if not db:
+        flash('База данных недоступна')
+        return redirect(url_for('products'))
+    
+    if request.method == 'POST':
+        try:
+            name = request.form['name']
+            description = request.form.get('description', '')
+            price = float(request.form['price'])
+            cost_price = float(request.form.get('cost_price', 0))
+            category_id = int(request.form['category_id'])
+            stock = int(request.form['stock'])
+            
+            # Обработка изображения
+            image_url = request.form.get('image_url', '')
+            if 'image_file' in request.files and request.files['image_file'].filename:
+                file = request.files['image_file']
+                if file and allowed_file(file.filename):
+                    filename = str(uuid.uuid4()) + '.' + file.filename.rsplit('.', 1)[1].lower()
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    image_url = f'/static/uploads/{filename}'
+            
+            result = db.execute_query('''
+                UPDATE products 
+                SET name = ?, description = ?, price = ?, cost_price = ?, 
+                    category_id = ?, image_url = ?, stock = ?, updated_at = ?
+                WHERE id = ?
+            ''', (name, description, price, cost_price, category_id, image_url, stock, 
+                  datetime.now().strftime('%Y-%m-%d %H:%M:%S'), product_id))
+            
+            if result is not None:
+                if telegram_bot:
+                    telegram_bot.trigger_bot_data_reload()
+                flash(f'Товар "{name}" обновлен!')
+                return redirect(url_for('products'))
+            else:
+                flash('Ошибка обновления товара')
+                
+        except Exception as e:
+            flash(f'Ошибка: {e}')
+    
+    # Получаем данные товара
+    product = db.get_product_by_id(product_id)
+    if not product:
+        flash('Товар не найден')
+        return redirect(url_for('products'))
+    
+    categories = db.get_categories()
+    return render_template('edit_product.html', product=product, categories=categories or [])
+
+@app.route('/api/product_stats/<int:product_id>')
+@login_required
+def product_stats(product_id):
+    if not db:
+        return jsonify({'success': False, 'error': 'База данных недоступна'})
+    
+    try:
+        product = db.get_product_by_id(product_id)
+        if not product:
+            return jsonify({'success': False, 'error': 'Товар не найден'})
+        
+        # Статистика товара
+        stats = db.execute_query('''
+            SELECT 
+                (SELECT COUNT(*) FROM cart WHERE product_id = ?) as in_cart,
+                (SELECT COUNT(*) FROM favorites WHERE product_id = ?) as in_favorites,
+                (SELECT COUNT(*) FROM reviews WHERE product_id = ?) as reviews_count
+        ''', (product_id, product_id, product_id))
+        
+        return jsonify({
+            'success': True,
+            'views': product[8],
+            'sales': product[9],
+            'in_cart': stats[0][0] if stats else 0,
+            'in_favorites': stats[0][1] if stats else 0,
+            'reviews': stats[0][2] if stats else 0
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

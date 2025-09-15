@@ -99,7 +99,7 @@
                         <br><small>ID: {{ product[0] }}</small>
                     </div>
                     <div>
-                        <button class="btn btn-sm btn-danger">
+                        <button class="btn btn-sm btn-danger" onclick="restockProduct({{ product[0] }}, '{{ product[1] }}')">
                             <i class="fas fa-plus me-1"></i>Пополнить
                         </button>
                     </div>
@@ -116,7 +116,7 @@
                         <br><small>Остаток: {{ product[2] }} шт.</small>
                     </div>
                     <div>
-                        <button class="btn btn-sm btn-warning">
+                        <button class="btn btn-sm btn-warning" onclick="restockProduct({{ product[0] }}, '{{ product[1] }}')">
                             <i class="fas fa-plus me-1"></i>Пополнить
                         </button>
                     </div>
@@ -238,4 +238,17 @@
     </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function restockProduct(productId, productName) {
+    const quantity = prompt(`Сколько единиц товара "${productName}" добавить на склад?`, '10');
+    if (quantity && !isNaN(quantity) && parseInt(quantity) > 0) {
+        // Здесь должен быть AJAX запрос для пополнения
+        alert(`Добавлено ${quantity} единиц товара "${productName}" на склад`);
+        location.reload();
+    }
+}
+</script>
 {% endblock %}

@@ -45,32 +45,12 @@
                         <td><strong>Чистая выручка:</strong></td>
                         <td class="text-end"><strong>${{ "%.2f"|format(profit_loss.net_revenue) }}</strong></td>
                     </tr>
-                    <tr>
-                        <td>Себестоимость:</td>
-                        <td class="text-end text-warning">-${{ "%.2f"|format(profit_loss.cogs) }}</td>
-                    </tr>
-                    <tr class="table-success">
-                        <td><strong>Валовая прибыль:</strong></td>
-                        <td class="text-end"><strong>${{ "%.2f"|format(profit_loss.gross_profit) }}</strong></td>
-                    </tr>
-                    <tr>
-                        <td>Операционные расходы:</td>
-                        <td class="text-end text-warning">-${{ "%.2f"|format(profit_loss.operating_expenses) }}</td>
-                    </tr>
-                    <tr>
-                        <td>Налоги:</td>
-                        <td class="text-end text-warning">-${{ "%.2f"|format(profit_loss.tax_amount) }}</td>
-                    </tr>
-                    <tr class="table-primary">
-                        <td><strong>Чистая прибыль:</strong></td>
-                        <td class="text-end"><strong>${{ "%.2f"|format(profit_loss.net_profit) }}</strong></td>
-                    </tr>
                 </table>
                 
                 <div class="mt-3">
                     <div class="d-flex justify-content-between">
-                        <span>Валовая маржа:</span>
-                        <span class="fw-bold">{{ "%.1f"|format(profit_loss.gross_margin) }}%</span>
+                        <span>Заказов за период:</span>
+                        <span class="fw-bold">{{ profit_loss.orders_count }}</span>
                     </div>
                 </div>
             </div>

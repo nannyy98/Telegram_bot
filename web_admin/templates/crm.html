@@ -95,7 +95,7 @@
                         <td>{{ customer[3][:10] if customer[3] else 'Никогда' }}</td>
                         <td>
                             <span class="badge bg-{{ 'danger' if customer[4] > 120 else 'warning' if customer[4] > 90 else 'info' }}">
-                                {{ "%.0f"|format(customer[4]) }} дней
+                                {{ "%.0f"|format(customer[7]) }} дней
                             </span>
                         </td>
                         <td>{{ customer[5] }}</td>

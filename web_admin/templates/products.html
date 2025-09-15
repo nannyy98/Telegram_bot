@@ -134,7 +134,7 @@
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <button type="button" class="btn btn-outline-primary" 
-                                        onclick="editProduct({{ product[0] }})" title="Редактировать">
+                                        onclick="window.location.href='{{ url_for('edit_product', product_id=product[0]) }}'" title="Редактировать">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button type="button" class="btn btn-outline-info" 
@@ -162,7 +162,7 @@
                                     <input type="hidden" name="product_id" value="{{ product[0] }}">
                                     <button type="submit" class="btn btn-outline-info" 
                                             title="Уведомить о товаре"
-                                            onclick="return confirm('Отправить уведомление о товаре в канал?')">
+                                            onclick="return confirm('Отправить уведомление о товаре {{ product[1] }} в канал?')">
                                         <i class="fas fa-bullhorn"></i>
                                     </button>
                                 </form>
@@ -226,15 +226,21 @@
 
 {% block scripts %}
 <script>
-function editProduct(productId) {
-    const newName = prompt('Введите новое название товара:');
-    if (newName) {
-        alert(`Товар переименован в: ${newName}`);
-    }
-}
-
 function viewProductStats(productId) {
-    alert(`Статистика товара ID: ${productId}\n\nПросмотры: 150\nПродажи: 25\nКонверсия: 16.7%`);
+    // Получаем статистику товара
+    fetch(`/api/product_stats/${productId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('info', 'Статистика товара', 
+                    `Просмотры: ${data.views}\nПродажи: ${data.sales}\nВ корзине: ${data.in_cart}`);
+            } else {
+                showAlert('error', 'Ошибка', 'Не удалось загрузить статистику');
+            }
+        })
+        .catch(error => {
+            showAlert('error', 'Ошибка', 'Проблема с загрузкой данных');
+        });
 }
 </script>
 {% endblock %}
