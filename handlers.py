@@ -278,7 +278,7 @@ class MessageHandler:
             self._process_rating_comment(message)
         elif text.startswith('🛍 ') and ' - $' in text:
             self._handle_product_selection(message)
-        elif text.startswith('📱 ') or text.startswith('👕 ') or text.startswith('🏠 '):
+        elif self._is_category_button(text):
             self._handle_category_selection(message)
         else:
             self._handle_unknown_text(message)
