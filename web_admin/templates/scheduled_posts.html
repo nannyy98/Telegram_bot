@@ -401,6 +401,11 @@ function toggleTemplate(templateId, isActive) {
 
 function sendNow(templateId) {
     if (confirm('Отправить пост по этому шаблону прямо сейчас?')) {
+        const button = event.target;
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+        button.disabled = true;
+        
         fetch('/send_template_now', {
             method: 'POST',
             headers: {
@@ -418,6 +423,10 @@ function sendNow(templateId) {
         })
         .catch(error => {
             showNotification('error', 'Ошибка отправки');
+        })
+        .finally(() => {
+            button.innerHTML = originalHtml;
+            button.disabled = false;
         });
     }
 }
@@ -497,6 +506,11 @@ function fillQuickTemplate(type) {
 }
 
 function testConnection() {
+    const button = event.target;
+    const originalHtml = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Проверка...';
+    button.disabled = true;
+    
     fetch('/test_channel_connection')
         .then(response => response.json())
         .then(data => {
@@ -508,6 +522,10 @@ function testConnection() {
         })
         .catch(error => {
             showNotification('error', 'Ошибка проверки связи');
+        })
+        .finally(() => {
+            button.innerHTML = originalHtml;
+            button.disabled = false;
         });
 }
 

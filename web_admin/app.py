@@ -634,9 +634,23 @@ def delete_template():
 @app.route('/send_template_now', methods=['POST'])
 @login_required
 def send_template_now():
+    # Проверяем, не отправляли ли уже этот шаблон недавно
+    template_id = request.form['template_id']
+    
+    # Проверяем последнюю отправку этого шаблона
+    recent_send = db.execute_query('''
+        SELECT sent_at FROM post_statistics 
+        WHERE post_id = ? AND sent_at >= datetime('now', '-5 minutes')
+        ORDER BY sent_at DESC LIMIT 1
+    ''', (template_id,))
+    
+    if recent_send:
+        return jsonify({
+            'success': False, 
+            'error': 'Этот шаблон уже отправлялся в последние 5 минут. Подождите немного.'
+        })
+    
     try:
-        template_id = request.form['template_id']
-        
         # Получаем шаблон
         template = db.execute_query(
             'SELECT title, content, post_type, image_url FROM auto_post_templates WHERE id = ?',
@@ -662,12 +676,13 @@ def send_template_now():
         }
         
         # Отправляем в канал
+        send_result = None
         if image_url:
-            result = telegram_bot.send_photo("-1002566537425", image_url, message, keyboard)
+            send_result = telegram_bot.send_photo("-1002566537425", image_url, message, keyboard)
         else:
-            result = telegram_bot.send_message("-1002566537425", message, keyboard)
+            send_result = telegram_bot.send_message("-1002566537425", message, keyboard)
         
-        if result and result.get('ok'):
+        if send_result and send_result.get('ok'):
             # Записываем статистику
             db.execute_query('''
                 INSERT INTO post_statistics (post_id, time_period, sent_count, error_count, sent_at)
@@ -676,9 +691,26 @@ def send_template_now():
             
             return jsonify({'success': True})
         else:
-            return jsonify({'success': False, 'error': 'Ошибка отправки в Telegram'})
+            error_msg = send_result.get('description', 'Неизвестная ошибка') if send_result else 'Нет ответа от Telegram'
+            
+            # Записываем ошибку в статистику
+            db.execute_query('''
+                INSERT INTO post_statistics (post_id, time_period, sent_count, error_count, sent_at)
+                VALUES (?, 'manual', 0, 1, ?)
+            ''', (template_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            
+            return jsonify({'success': False, 'error': f'Ошибка отправки: {error_msg}'})
             
     except Exception as e:
+        # Записываем ошибку в статистику
+        try:
+            db.execute_query('''
+                INSERT INTO post_statistics (post_id, time_period, sent_count, error_count, sent_at)
+                VALUES (?, 'manual', 0, 1, ?)
+            ''', (template_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+        except:
+            pass
+            
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/api/template/<int:template_id>')
@@ -840,6 +872,17 @@ def send_now_post():
 @app.route('/test_channel_post', methods=['POST'])
 @login_required
 def test_channel_post():
+    # Проверяем, не отправляли ли тест недавно
+    recent_test = db.execute_query('''
+        SELECT sent_at FROM post_statistics 
+        WHERE time_period = 'test' AND sent_at >= datetime('now', '-2 minutes')
+        ORDER BY sent_at DESC LIMIT 1
+    ''')
+    
+    if recent_test:
+        flash('⚠️ Тестовое сообщение уже отправлялось недавно. Подождите 2 минуты.')
+        return redirect(url_for('scheduled_posts'))
+    
     title = "🧪 Тест канала"
     content = "Это тестовое сообщение из веб-панели администратора.\n\n✅ Если вы видите это сообщение, интеграция работает корректно!\n\n📅 Время отправки: " + datetime.now().strftime('%H:%M:%S')
     test_image = "https://images.pexels.com/photos/1464625/pexels-photo-1464625.jpeg"
@@ -864,10 +907,32 @@ def test_channel_post():
         result = telegram_bot.send_photo("-1002566537425", test_image, f"📢 <b>{title}</b>\n\n{message_text}", test_keyboard)
         
         if result and result.get('ok'):
+            # Записываем статистику теста
+            db.execute_query('''
+                INSERT INTO post_statistics (post_id, time_period, sent_count, error_count, sent_at)
+                VALUES (0, 'test', 1, 0, ?)
+            ''', (datetime.now().strftime('%Y-%m-%d %H:%M:%S'),))
+            
             flash('✅ Тестовый пост с изображением отправлен в канал!')
         else:
-            flash(f'Ошибка отправки в канал: {result}')
+            # Записываем ошибку
+            db.execute_query('''
+                INSERT INTO post_statistics (post_id, time_period, sent_count, error_count, sent_at)
+                VALUES (0, 'test', 0, 1, ?)
+            ''', (datetime.now().strftime('%Y-%m-%d %H:%M:%S'),))
+            
+            error_msg = result.get('description', 'Неизвестная ошибка') if result else 'Нет ответа от Telegram'
+            flash(f'❌ Ошибка отправки в канал: {error_msg}')
     except Exception as e:
+        # Записываем ошибку
+        try:
+            db.execute_query('''
+                INSERT INTO post_statistics (post_id, time_period, sent_count, error_count, sent_at)
+                VALUES (0, 'test', 0, 1, ?)
+            ''', (datetime.now().strftime('%Y-%m-%d %H:%M:%S'),))
+        except:
+            pass
+            
         flash(f'Ошибка отправки тестового поста: {e}')
     
     return redirect(url_for('scheduled_posts'))
@@ -1009,7 +1074,19 @@ def delete_product():
 @app.route('/notify_new_product', methods=['POST'])
 @login_required
 def notify_new_product():
+    # Проверяем, не уведомляли ли об этом товаре недавно
     product_id = request.form['product_id']
+    
+    recent_notification = db.execute_query('''
+        SELECT sent_at FROM post_statistics 
+        WHERE post_id = ? AND time_period = 'product_notification' 
+        AND sent_at >= datetime('now', '-1 hour')
+        ORDER BY sent_at DESC LIMIT 1
+    ''', (product_id,))
+    
+    if recent_notification:
+        flash('⚠️ Уведомление об этом товаре уже отправлялось в последний час.')
+        return redirect(url_for('products'))
     
     product = db.get_product_by_id(product_id)
     if not product:
@@ -1032,9 +1109,22 @@ def notify_new_product():
             result = telegram_bot.send_to_channel(message)
         
         if result and result.get('ok'):
+            # Записываем статистику уведомления
+            db.execute_query('''
+                INSERT INTO post_statistics (post_id, time_period, sent_count, error_count, sent_at)
+                VALUES (?, 'product_notification', 1, 0, ?)
+            ''', (product_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            
             flash(f'Уведомление о товаре "{product[1]}" отправлено в канал!')
         else:
-            flash(f'Ошибка отправки в канал: {result}')
+            # Записываем ошибку
+            db.execute_query('''
+                INSERT INTO post_statistics (post_id, time_period, sent_count, error_count, sent_at)
+                VALUES (?, 'product_notification', 0, 1, ?)
+            ''', (product_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            
+            error_msg = result.get('description', 'Неизвестная ошибка') if result else 'Нет ответа от Telegram'
+            flash(f'❌ Ошибка отправки в канал: {error_msg}')
     except Exception as e:
         flash(f'Ошибка отправки уведомления: {e}')
     
