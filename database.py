@@ -514,6 +514,19 @@ CREATE TABLE IF NOT EXISTS post_statistics (
 )
         ''')
         
+        # Шаблоны автопостов
+        cursor.execute('''
+CREATE TABLE IF NOT EXISTS auto_post_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    post_type TEXT NOT NULL CHECK (post_type IN ('greeting', 'promotion', 'congratulation')),
+    image_url TEXT,
+    is_active INTEGER DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+        ''')
+        
         # Создаем индексы для оптимизации
         self.create_indexes(cursor)
     
