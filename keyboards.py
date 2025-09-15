@@ -55,7 +55,7 @@ def create_products_keyboard(products, show_back=True):
     keyboard = []
     
     for product in products:
-        keyboard.append([f"🛍 {product[1]} - ${product[3]:.2f}"])
+        keyboard.append([f"🛍 {product[1]} - {format_price(product[3])}"])
     
     if show_back:
         keyboard.append(['🔙 К категориям', '🏠 Главная'])
@@ -67,10 +67,6 @@ def create_products_keyboard(products, show_back=True):
         'resize_keyboard': True,
         'one_time_keyboard': False
     }
-
-def format_price(price):
-    """Форматирование цены для клавиатур"""
-    return f"${price:.2f}"
 
 def create_product_inline_keyboard(product_id):
     """Inline клавиатура для товара"""

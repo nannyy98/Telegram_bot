@@ -90,13 +90,13 @@ class NotificationManager:
                         localized_message,
                         notification['type']
                     )
-                    print(f"✅ Push отправлен пользователю {telegram_id}")
+                    logger.info(f"✅ Push отправлен пользователю {telegram_id}")
                 else:
                     raise Exception("Не удалось отправить сообщение")
                     
         except Exception as e:
             notification['attempts'] += 1
-            print(f"❌ Ошибка отправки push пользователю {notification['user_id']}: {e}")
+            logger.error(f"❌ Ошибка отправки push пользователю {notification['user_id']}: {e}")
             
             # Повторная попытка если не превышен лимит
             if notification['attempts'] < notification['max_attempts']:

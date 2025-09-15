@@ -284,7 +284,7 @@ def send_push_to_user(bot, user_id, title, message, notification_type='info'):
                 return True
                 
     except Exception as e:
-        print(f"Ошибка отправки push-уведомления: {e}")
+        logger.error(f"Ошибка отправки push-уведомления: {e}")
     
     return False
 
@@ -292,3 +292,4 @@ def schedule_push_notification(notification_manager, user_id, title, message, de
     """Планирование отложенного push-уведомления"""
     notification_manager.send_delayed_push(
         user_id, title, message, delay_minutes, notification_type
+    )

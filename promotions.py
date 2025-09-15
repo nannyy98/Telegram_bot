@@ -37,6 +37,7 @@ class PromotionManager:
         
         # Проверка минимальной суммы заказа
         if order_amount < promo_data[4]:
+            from utils import format_price
             return {'valid': False, 'error': f'Минимальная сумма заказа: {format_price(promo_data[4])}'}
         
         # Проверка лимита использований

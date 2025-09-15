@@ -72,7 +72,24 @@ class Localization:
 🛒 <b>Ваша корзина пуста</b>
 
 Перейдите в каталог, чтобы добавить товары!
-                """
+                """,
+                
+                # Дополнительные переводы
+                'miss_you_title': 'Мы скучаем по вам!',
+                'miss_you_message': 'давно не было заказов',
+                'special_offer': 'Специальное предложение',
+                'discount': 'скидка',
+                'promo_code': 'Промокод',
+                'valid_until': 'Действует до',
+                'come_back_cta': 'Вернитесь к нам!',
+                'restock_notification': 'Товар поступил!',
+                'back_in_stock': 'Снова в наличии',
+                'order_now': 'Заказать сейчас',
+                'tier_upgrade_title': 'Повышение уровня!',
+                'congratulations': 'Поздравляем',
+                'new_tier': 'Новый уровень',
+                'your_benefits': 'Ваши преимущества',
+                'enjoy_benefits': 'Пользуйтесь преимуществами!'
             },
             
             'uz': {
@@ -142,7 +159,24 @@ Xaridlaringiz baxtiyor bo'lsin! 🛍
 🛒 <b>Savatingiz bo'sh</b>
 
 Mahsulot qo'shish uchun katalogga o'ting!
-                """
+                """,
+                
+                # Дополнительные переводы
+                'miss_you_title': 'Sizni sog\'indik!',
+                'miss_you_message': 'uzoq vaqt buyurtma bermadingiz',
+                'special_offer': 'Maxsus taklif',
+                'discount': 'chegirma',
+                'promo_code': 'Promokod',
+                'valid_until': 'Amal qiladi',
+                'come_back_cta': 'Bizga qayting!',
+                'restock_notification': 'Mahsulot keldi!',
+                'back_in_stock': 'Yana mavjud',
+                'order_now': 'Hozir buyurtma bering',
+                'tier_upgrade_title': 'Daraja oshirildi!',
+                'congratulations': 'Tabriklaymiz',
+                'new_tier': 'Yangi daraja',
+                'your_benefits': 'Sizning imtiyozlaringiz',
+                'enjoy_benefits': 'Imtiyozlardan foydalaning!'
             }
         }
     

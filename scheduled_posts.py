@@ -145,7 +145,7 @@ class ScheduledPostsManager:
     def send_scheduled_post(self, post_id, time_period):
         """Отправка запланированного поста"""
         try:
-            print(f"🔄 Отправка поста {post_id} ({time_period})...")
+            logger.info(f"🔄 Отправка поста {post_id} ({time_period})...")
             
             # Получаем данные поста
             post_data = self.db.execute_query(
@@ -154,24 +154,24 @@ class ScheduledPostsManager:
             )
             
             if not post_data:
-                print(f"❌ Пост {post_id} не найден")
+                logger.error(f"❌ Пост {post_id} не найден")
                 return
             
             title, content, target_audience, image_url = post_data[0]
-            print(f"📝 Пост: {title}, Аудитория: {target_audience}")
+            logger.info(f"📝 Пост: {title}, Аудитория: {target_audience}")
             
             # Получаем список получателей
             recipients = self.get_target_audience(target_audience)
             
             if not recipients:
-                print(f"⚠️ Нет получателей для поста {post_id}")
+                logger.warning(f"⚠️ Нет получателей для поста {post_id}")
                 return
             
-            print(f"👥 Получателей: {len(recipients)}")
+            logger.info(f"👥 Получателей: {len(recipients)}")
             
             # Форматируем сообщение
             message_text = self.format_post_message(title, content, time_period)
-            print(f"📄 Сообщение готово: {len(message_text)} символов")
+            logger.info(f"📄 Сообщение готово: {len(message_text)} символов")
             
             # Создаем кнопки для товаров
             keyboard = self.create_post_keyboard()
@@ -182,7 +182,7 @@ class ScheduledPostsManager:
             
             if target_audience == 'channel':
                 # Отправляем в канал ТОЛЬКО ОДИН РАЗ
-                print(f"📺 Отправка в канал {self.channel_id}")
+                logger.info(f"📺 Отправка в канал {self.channel_id}")
                 try:
                     if image_url:
                         result = self.bot.send_photo(self.channel_id, image_url, message_text, keyboard)
@@ -191,16 +191,13 @@ class ScheduledPostsManager:
                     
                     if result and result.get('ok'):
                         success_count = 1
-                        print(f"✅ Пост отправлен в канал")
-                        
-                        # НЕ отправляем товары автоматически - только по запросу
-                        # self.send_product_reviews_to_channel()
+                        logger.info(f"✅ Пост отправлен в канал")
                     else:
                         error_count = 1
-                        print(f"❌ Ошибка отправки в канал: {result}")
+                        logger.error(f"❌ Ошибка отправки в канал: {result}")
                 except Exception as e:
                     error_count = 1
-                    print(f"❌ Ошибка отправки в канал: {e}")
+                    logger.error(f"❌ Ошибка отправки в канал: {e}")
             else:
                 # Отправляем пользователям
                 for recipient in recipients:
@@ -217,7 +214,7 @@ class ScheduledPostsManager:
                             error_count += 1
                     except Exception as e:
                         error_count += 1
-                        print(f"❌ Ошибка отправки пользователю: {e}")
+                        logger.error(f"❌ Ошибка отправки пользователю: {e}")
             
             # Записываем статистику
             current_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
@@ -229,10 +226,10 @@ class ScheduledPostsManager:
                 post_id, time_period, success_count, error_count, current_time
             ))
             
-            print(f"📊 Пост {post_id} ({time_period}): отправлен {success_count}, ошибок {error_count}")
+            logger.info(f"📊 Пост {post_id} ({time_period}): отправлен {success_count}, ошибок {error_count}")
             
         except Exception as e:
-            print(f"❌ Ошибка отправки запланированного поста {post_id}: {e}")
+            logger.error(f"❌ Ошибка отправки запланированного поста {post_id}: {e}")
     
     def get_target_audience(self, audience_type):
         """Получение целевой аудитории"""

@@ -777,7 +777,7 @@ class MarketingAutomationManager:
             'generated_revenue': results[1] or 0,
             'avg_order_value': results[2] or 0,
             'conversion_rate': conversion_rate,
-            'roi': ((results[1] or 0) / 100) if results[1] else 0  # Примерная стоимость кампании $100
+            'roi': ((results[1] or 0) / 100) if results[1] else 0
         }
     
     def get_automation_statistics(self):

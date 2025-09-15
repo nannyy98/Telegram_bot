@@ -363,7 +363,7 @@ class ChatbotSupport:
 • Email: support@shop.uz
 
 ❓ Попробуйте переформулировать вопрос или используйте ключевые слова.
-        '''
+        '''.strip()
     
     def get_smart_search_suggestions(self, query):
         """Умные предложения для поиска"""

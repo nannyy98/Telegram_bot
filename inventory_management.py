@@ -248,11 +248,10 @@ class InventoryManager:
         admins = self.db.execute_query('SELECT telegram_id FROM users WHERE is_admin = 1')
         for admin in admins:
             try:
-                # Используем метод бота для отправки
                 if hasattr(self, 'bot'):
                     self.bot.send_message(admin[0], notification_text)
             except Exception as e:
-                print(f"Ошибка уведомления админа {admin[0]}: {e}")
+                logger.error(f"Ошибка уведомления админа {admin[0]}: {e}")
     
     def notify_restock(self, product_id):
         """Уведомление о поступлении товара"""

@@ -990,3 +990,4 @@ CREATE TABLE IF NOT EXISTS post_statistics (
         return self.execute_query(
             'UPDATE users SET language = ? WHERE id = ?',
             (language, user_id)
+        )
