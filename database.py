@@ -656,6 +656,40 @@ CREATE TABLE IF NOT EXISTS auto_post_templates (
             INSERT INTO suppliers (name, contact_email, phone, address, payment_terms)
             VALUES (?, ?, ?, ?, ?)
         ''', suppliers)
+        
+        # Создаем базовые шаблоны автопостов
+        self.create_default_post_templates(cursor)
+        
+        print("✅ Тестовые данные созданы")
+    
+    def create_default_post_templates(self, cursor):
+        """Создание базовых шаблонов автопостов"""
+        default_templates = [
+            (
+                'Доброе утро!',
+                'Начните день с выгодных покупок!\n\n🛍 Новинки в каталоге ждут вас!\n💰 Лучшие цены каждый день!',
+                'greeting',
+                'https://images.pexels.com/photos/1002703/pexels-photo-1002703.jpeg'
+            ),
+            (
+                'Горячие предложения!',
+                'Не пропустите наши специальные предложения!\n\n🔥 Скидки до 50%\n⚡ Ограниченное время\n🎯 Только лучшие товары',
+                'promotion',
+                'https://images.pexels.com/photos/1303081/pexels-photo-1303081.jpeg'
+            ),
+            (
+                'Отличного дня!',
+                'Спасибо, что выбираете нас!\n\n🌟 Ваше доверие - наша мотивация\n💝 Работаем для вашего комфорта\n🚀 Развиваемся вместе с вами',
+                'congratulation',
+                'https://images.pexels.com/photos/1464625/pexels-photo-1464625.jpeg'
+            )
+        ]
+        
+        for template in default_templates:
+            cursor.execute('''
+                INSERT OR IGNORE INTO auto_post_templates (title, content, post_type, image_url)
+                VALUES (?, ?, ?, ?)
+            ''', template)
     
     def execute_query(self, query, params=None):
         """Выполнение SQL запроса"""

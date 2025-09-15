@@ -173,8 +173,7 @@ class TelegramShopBot:
         # Инициализация системы автоматических постов
         try:
             self.scheduled_posts = ScheduledPostsManager(self, self.db)
-            self.scheduled_posts.bot = self
-            logger.info("✅ Система автоматических постов инициализирована")
+            logger.info("✅ Менеджер постов инициализирован (только ручная отправка)")
         except Exception as e:
             logger.warning(f"⚠️ Автопосты недоступны: {e}")
             self.scheduled_posts = None

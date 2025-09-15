@@ -557,8 +557,168 @@ def create_post():
             flash('Ошибка создания поста')
     
     return render_template('create_post.html')
+def create_template():
+    try:
+        title = request.form['title']
+        content = request.form['content']
+        post_type = request.form['post_type']
+        image_url = request.form.get('image_url', '')
+        
+        template_id = db.execute_query('''
+            INSERT INTO auto_post_templates (title, content, post_type, image_url, is_active, created_at)
+            VALUES (?, ?, ?, ?, 1, ?)
+        ''', (title, content, post_type, image_url, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+        
+        if template_id:
+            flash(f'Шаблон "{title}" создан!')
+        else:
+            flash('Ошибка создания шаблона')
+    except Exception as e:
+        flash(f'Ошибка: {e}')
+    
+    return redirect(url_for('scheduled_posts'))
 
-@app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
+@app.route('/edit_template', methods=['POST'])
+@login_required
+def edit_template():
+    try:
+        template_id = request.form['template_id']
+        title = request.form['title']
+        content = request.form['content']
+        post_type = request.form['post_type']
+        image_url = request.form.get('image_url', '')
+        
+        result = db.execute_query('''
+            UPDATE auto_post_templates 
+            SET title = ?, content = ?, post_type = ?, image_url = ?
+            WHERE id = ?
+        ''', (title, content, post_type, image_url, template_id))
+        
+        if result is not None:
+            flash(f'Шаблон "{title}" обновлен!')
+        else:
+            flash('Ошибка обновления шаблона')
+    except Exception as e:
+        flash(f'Ошибка: {e}')
+    
+    return redirect(url_for('scheduled_posts'))
+
+@app.route('/toggle_template', methods=['POST'])
+@login_required
+def toggle_template():
+    try:
+        template_id = request.form['template_id']
+        is_active = int(request.form['is_active'])
+        
+        result = db.execute_query(
+            'UPDATE auto_post_templates SET is_active = ? WHERE id = ?',
+            (is_active, template_id)
+        )
+        
+        return jsonify({'success': result is not None})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/delete_template', methods=['POST'])
+@login_required
+def delete_template():
+    try:
+        template_id = request.form['template_id']
+        
+        result = db.execute_query('DELETE FROM auto_post_templates WHERE id = ?', (template_id,))
+        
+        return jsonify({'success': result is not None})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/send_template_now', methods=['POST'])
+@login_required
+def send_template_now():
+    try:
+        template_id = request.form['template_id']
+        
+        # Получаем шаблон
+        template = db.execute_query(
+            'SELECT title, content, post_type, image_url FROM auto_post_templates WHERE id = ?',
+            (template_id,)
+        )
+        
+        if not template:
+            return jsonify({'success': False, 'error': 'Шаблон не найден'})
+        
+        title, content, post_type, image_url = template[0]
+        
+        # Форматируем сообщение
+        message = f"📢 <b>{title}</b>\n\n{content}\n\n🛍 Перейти в каталог: /start"
+        
+        # Создаем кнопки
+        keyboard = {
+            'inline_keyboard': [
+                [
+                    {'text': '🛒 Заказать товары', 'url': 'https://t.me/your_bot_username'},
+                    {'text': '🌐 Перейти на сайт', 'url': 'https://your-website.com'}
+                ]
+            ]
+        }
+        
+        # Отправляем в канал
+        if image_url:
+            result = telegram_bot.send_photo("-1002566537425", image_url, message, keyboard)
+        else:
+            result = telegram_bot.send_message("-1002566537425", message, keyboard)
+        
+        if result and result.get('ok'):
+            # Записываем статистику
+            db.execute_query('''
+                INSERT INTO post_statistics (post_id, time_period, sent_count, error_count, sent_at)
+                VALUES (?, 'manual', 1, 0, ?)
+            ''', (template_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Ошибка отправки в Telegram'})
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/template/<int:template_id>')
+@login_required
+def get_template(template_id):
+    try:
+        template = db.execute_query(
+            'SELECT title, content, post_type, image_url FROM auto_post_templates WHERE id = ?',
+            (template_id,)
+        )
+        
+        if template:
+            return jsonify({
+                'success': True,
+                'template': {
+                    'title': template[0][0],
+                    'content': template[0][1],
+                    'post_type': template[0][2],
+                    'image_url': template[0][3]
+                }
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Шаблон не найден'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/test_channel_connection')
+@login_required
+def test_channel_connection():
+    try:
+        test_message = f"🧪 <b>Тест канала</b>\n\nВремя: {datetime.now().strftime('%H:%M:%S')}\n\n✅ Связь работает!"
+        result = telegram_bot.send_message("-1002566537425", test_message)
+        
+        if result and result.get('ok'):
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Ошибка отправки'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
 @login_required
 def edit_post(post_id):
     if request.method == 'POST':
