@@ -7,7 +7,12 @@ import re
 
 def format_price(price):
     """Форматирование цены"""
-    return f"${price:.2f}"
+    try:
+        if price is None:
+            return "$0.00"
+        return f"${float(price):.2f}"
+    except (ValueError, TypeError):
+        return "$0.00"
 
 def format_date(date_string):
     """Форматирование даты"""

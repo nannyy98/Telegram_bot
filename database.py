@@ -755,18 +755,33 @@ CREATE TABLE IF NOT EXISTS auto_post_templates (
     
     def get_products_by_category(self, category_id, limit=10, offset=0):
         """Получение товаров по категории"""
-        # Сначала получаем подкатегории
-        subcategories = self.execute_query('''
-            SELECT DISTINCT s.id, s.name, s.emoji, COUNT(p.id) as products_count
-            FROM subcategories s
-            LEFT JOIN products p ON s.id = p.subcategory_id AND p.is_active = 1
-            WHERE s.category_id = ? AND s.is_active = 1
-            GROUP BY s.id, s.name, s.emoji
-            HAVING products_count > 0
-            ORDER BY s.name
-        ''', (category_id,))
-        
-        return subcategories
+        try:
+            # Сначала проверяем есть ли подкатегории
+            subcategories = self.execute_query('''
+                SELECT DISTINCT s.id, s.name, s.emoji, COUNT(p.id) as products_count
+                FROM subcategories s
+                LEFT JOIN products p ON s.id = p.subcategory_id AND p.is_active = 1
+                WHERE s.category_id = ? AND s.is_active = 1
+                GROUP BY s.id, s.name, s.emoji
+                HAVING products_count > 0
+                ORDER BY s.name
+            ''', (category_id,))
+            
+            # Если нет подкатегорий, возвращаем товары напрямую
+            if not subcategories:
+                products = self.execute_query('''
+                    SELECT id, name, description, price, category_id, image_url, stock, is_active
+                    FROM products 
+                    WHERE category_id = ? AND is_active = 1
+                    ORDER BY name
+                    LIMIT ?
+                ''', (category_id, limit))
+                return products
+            
+            return subcategories
+        except Exception as e:
+            print(f"Ошибка получения товаров по категории: {e}")
+            return []
     
     def get_products_by_subcategory(self, subcategory_id, limit=10, offset=0):
         """Получение товаров по подкатегории"""

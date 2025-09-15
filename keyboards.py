@@ -19,11 +19,24 @@ def create_categories_keyboard(categories):
     """Клавиатура с категориями"""
     keyboard = []
     
-    for i in range(0, len(categories), 2):
-        row = [f"{categories[i][3]} {categories[i][1]}"]
-        if i + 1 < len(categories):
-            row.append(f"{categories[i + 1][3]} {categories[i + 1][1]}")
-        keyboard.append(row)
+    try:
+        for i in range(0, len(categories), 2):
+            row = []
+            if len(categories[i]) >= 4:
+                emoji = categories[i][3] if categories[i][3] else "📦"
+                name = categories[i][1] if categories[i][1] else "Без названия"
+                row.append(f"{emoji} {name}")
+            
+            if i + 1 < len(categories) and len(categories[i + 1]) >= 4:
+                emoji = categories[i + 1][3] if categories[i + 1][3] else "📦"
+                name = categories[i + 1][1] if categories[i + 1][1] else "Без названия"
+                row.append(f"{emoji} {name}")
+            
+            if row:
+                keyboard.append(row)
+    except Exception as e:
+        print(f"Ошибка создания клавиатуры категорий: {e}")
+        keyboard = [["❌ Ошибка загрузки каталога"]]
     
     keyboard.append(['🔙 Главная'])
     

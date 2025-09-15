@@ -283,34 +283,6 @@ class MessageHandler:
         else:
             self._handle_unknown_text(message)
     
-    def _handle_product_selection(self, message):
-        """Обработка выбора товара"""
-        chat_id = message['chat']['id']
-        telegram_id = message['from']['id']
-        text = message.get('text', '')
-        
-        try:
-            # Извлекаем название и цену товара
-            # Формат: "🛍 Название товара - $цена"
-            if ' - $' in text:
-                product_name = text.split(' - $')[0].replace('🛍 ', '')
-                
-                # Находим товар в базе
-                product = self.db.execute_query(
-                    'SELECT * FROM products WHERE name = ? AND is_active = 1',
-                    (product_name,)
-                )
-                
-                if product:
-                    self._show_product_details(chat_id, product[0])
-                else:
-                    self.bot.send_message(chat_id, "❌ Товар не найден")
-            else:
-                self.bot.send_message(chat_id, "❌ Неверный формат выбора товара")
-        except Exception as e:
-            logger.error(f"Ошибка выбора товара: {e}")
-            self.bot.send_message(chat_id, "❌ Ошибка обработки товара")
-    
     def _process_registration_name(self, message):
         """Обработка ввода имени при регистрации"""
         chat_id = message['chat']['id']
@@ -455,7 +427,12 @@ class MessageHandler:
     
     def _show_categories(self, chat_id, telegram_id):
         """Показ категорий товаров"""
-        categories = self.db.get_categories()
+        try:
+            categories = self.db.get_categories()
+        except Exception as e:
+            logger.error(f"Ошибка получения категорий: {e}")
+            self.bot.send_message(chat_id, "❌ Ошибка загрузки каталога")
+            return
         
         if categories:
             categories_text = "🛍 <b>Выберите категорию:</b>"
