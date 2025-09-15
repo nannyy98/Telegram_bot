@@ -555,6 +555,32 @@ class MessageHandler:
         
         self.bot.send_message(chat_id, profile_text, keyboard)
     
+    def _handle_category_selection(self, message):
+        """Обработка выбора категории"""
+        chat_id = message['chat']['id']
+        telegram_id = message['from']['id']
+        text = message.get('text', '')
+        
+        # Извлекаем название категории из текста кнопки
+        if ' ' in text:
+            category_name = text.split(' ', 1)[1]
+        else:
+            category_name = text
+        
+        # Находим категорию в базе данных
+        categories = self.db.get_categories()
+        selected_category = None
+        
+        for category in categories:
+            if category[1] == category_name:
+                selected_category = category
+                break
+        
+        if selected_category:
+            self._show_subcategories(chat_id, selected_category[0], selected_category[1])
+        else:
+            self.bot.send_message(chat_id, "❌ Категория не найдена")
+    
     def _handle_add_to_cart_callback(self, callback_query):
         """Обработка добавления в корзину"""
         try:
