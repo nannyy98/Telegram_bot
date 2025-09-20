@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Категории - Админ-панель{% endblock %}
+{% block page_title %}Управление категориями{% endblock %}
+
+{% block content %}
+<!-- Таблица категорий -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-tags me-2"></i>
+            Категории товаров ({{ categories|length }})
+        </h5>
+        <a href="{{ url_for('add_category') }}" class="btn btn-success btn-sm">
+            <i class="fas fa-plus me-1"></i>
+            Добавить категорию
+        </a>
+    </div>
+    
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Категория</th>
+                        <th>Описание</th>
+                        <th>Товаров</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <div class="icon-circle icon-primary text-white d-flex align-items-center justify-content-center" 
+                                         style="width: 45px; height: 45px; font-size: 1.5rem;">
+                                        {{ category[3] }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ category[1] }}</div>
+                                    <small class="text-muted">ID: {{ category[0] }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-muted">{{ category[2] or 'Без описания' }}</span>
+                        </td>
+                        <td>
+                            <div class="text-center">
+                                <div class="h5 mb-0 text-primary">{{ category[5] }}</div>
+                                <small class="text-muted">товаров</small>
+                            </div>
+                        </td>
+                        <td>
+                            {% if category[4] %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-eye me-1"></i>Активна
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-eye-slash me-1"></i>Скрыта
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-primary" 
+                                        onclick="editCategory({{ category[0] }}, '{{ category[1] }}', '{{ category[2] }}', '{{ category[3] }}')" 
+                                        title="Редактировать">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form method="POST" action="{{ url_for('toggle_category_status') }}" style="display: inline;">
+                                    <input type="hidden" name="category_id" value="{{ category[0] }}">
+                                    <input type="hidden" name="current_status" value="{{ category[4] }}">
+                                    <button type="submit" class="btn btn-outline-{{ 'warning' if category[4] else 'success' }}" 
+                                            title="{{ 'Скрыть' if category[4] else 'Показать' }}"
+                                            onclick="return confirm('{{ 'Скрыть' if category[4] else 'Показать' }} эту категорию?')">
+                                        <i class="fas fa-{{ 'eye-slash' if category[4] else 'eye' }}"></i>
+                                    </button>
+                                </form>
+                                <a href="{{ url_for('products') }}?category={{ category[0] }}" 
+                                   class="btn btn-outline-info" title="Товары категории">
+                                    <i class="fas fa-box"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if not categories %}
+        <div class="text-center py-5">
+            <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Категории не найдены</h5>
+            <p class="text-muted">Создайте первую категорию для товаров</p>
+            <a href="{{ url_for('add_category') }}" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>
+                Добавить категорию
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Модальное окно редактирования -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактирование категории</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('edit_category') }}">
+                <div class="modal-body">
+                    <input type="hidden" id="edit_category_id" name="category_id">
+                    
+                    <div class="mb-3">
+                        <label for="edit_name" class="form-label">Название</label>
+                        <input type="text" class="form-control" id="edit_name" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="edit_description" name="description" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_emoji" class="form-label">Эмодзи</label>
+                        <input type="text" class="form-control" id="edit_emoji" name="emoji" maxlength="2">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function editCategory(id, name, description, emoji) {
+    document.getElementById('edit_category_id').value = id;
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_description').value = description || '';
+    document.getElementById('edit_emoji').value = emoji || '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+    modal.show();
+}
+</script>
+{% endblock %}
