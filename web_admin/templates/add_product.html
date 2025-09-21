@@ -205,9 +205,9 @@ function updatePreview() {
         let preview = '<div class="text-center">';
         
         if (imageUrl) {
-            preview += `<img src="${imageUrl}" alt="${name}" class="img-fluid rounded mb-2" style="max-height: 150px; object-fit: cover;">`;
+            preview += `<img src="${imageUrl}" alt="${name}" class="product-preview-image">`;
         } else {
-            preview += '<div class="bg-light rounded d-flex align-items-center justify-content-center mb-2" style="height: 150px;"><i class="fas fa-image fa-2x text-muted"></i></div>';
+            preview += '<div class="product-preview-placeholder"><i class="fas fa-image"></i></div>';
         }
         
         if (name) {
@@ -219,7 +219,7 @@ function updatePreview() {
         }
         
         if (price) {
-            preview += `<div class="h5 text-success mb-2">$${price}</div>`;
+            preview += `<div class="product-preview-price">$${price}</div>`;
         }
         
         if (categoryName && categoryName !== 'Выберите категорию') {

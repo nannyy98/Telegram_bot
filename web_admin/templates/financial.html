@@ -149,7 +149,7 @@
                     {% for product in sales_report.top_products %}
                     <tr>
                         <td>
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                            <div class="financial-ranking-badge">
                                 {{ loop.index }}
                             </div>
                         </td>
@@ -158,8 +158,8 @@
                         <td><strong>${{ "%.2f"|format(product[2]) }}</strong></td>
                         <td>
                             <div class="progress" style="height: 20px;">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: {{ (product[2] / sales_report.top_products[0][2] * 100) if sales_report.top_products else 0 }}%">
+                                <div class="financial-progress-bar" 
+                                     data-width="{{ (product[2] / sales_report.top_products[0][2] * 100) if sales_report.top_products else 0 }}">
                                     {{ "%.1f"|format((product[2] / sales_report.top_products[0][2] * 100) if sales_report.top_products else 0) }}%
                                 </div>
                             </div>

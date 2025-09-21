@@ -36,49 +36,49 @@
 <!-- Ключевые метрики -->
 <div class="row mb-4">
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="metric-card stat-card">
-            <div class="icon-circle icon-primary text-white mx-auto">
+        <div class="analytics-metric-card orders-period">
+            <div class="analytics-icon">
                 <i class="fas fa-shopping-cart"></i>
             </div>
-            <div class="text-center">
-                <h2 class="stat-number">{{ sales_report.sales_data[0][0] if sales_report.sales_data else 0 }}</h2>
-                <p class="stat-label">Заказов за период</p>
+            <div class="analytics-content">
+                <h2 class="analytics-number">{{ sales_report.sales_data[0][0] if sales_report.sales_data else 0 }}</h2>
+                <p class="analytics-label">Заказов за период</p>
             </div>
         </div>
     </div>
     
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="metric-card stat-card-success">
-            <div class="icon-circle icon-success text-white mx-auto">
+        <div class="analytics-metric-card revenue-period">
+            <div class="analytics-icon">
                 <i class="fas fa-dollar-sign"></i>
             </div>
-            <div class="text-center">
-                <h2 class="stat-number">${{ "%.0f"|format(sales_report.sales_data[0][1] if sales_report.sales_data else 0) }}</h2>
-                <p class="stat-label">Общая выручка</p>
+            <div class="analytics-content">
+                <h2 class="analytics-number">${{ "%.0f"|format(sales_report.sales_data[0][1] if sales_report.sales_data else 0) }}</h2>
+                <p class="analytics-label">Общая выручка</p>
             </div>
         </div>
     </div>
     
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="metric-card stat-card-info">
-            <div class="icon-circle icon-info text-white mx-auto">
+        <div class="analytics-metric-card avg-order">
+            <div class="analytics-icon">
                 <i class="fas fa-receipt"></i>
             </div>
-            <div class="text-center">
-                <h2 class="stat-number">${{ "%.0f"|format(sales_report.sales_data[0][2] if sales_report.sales_data else 0) }}</h2>
-                <p class="stat-label">Средний чек</p>
+            <div class="analytics-content">
+                <h2 class="analytics-number">${{ "%.0f"|format(sales_report.sales_data[0][2] if sales_report.sales_data else 0) }}</h2>
+                <p class="analytics-label">Средний чек</p>
             </div>
         </div>
     </div>
     
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="metric-card stat-card-warning">
-            <div class="icon-circle icon-warning text-white mx-auto">
+        <div class="analytics-metric-card unique-customers">
+            <div class="analytics-icon">
                 <i class="fas fa-users"></i>
             </div>
-            <div class="text-center">
-                <h2 class="stat-number">{{ sales_report.sales_data[0][3] if sales_report.sales_data else 0 }}</h2>
-                <p class="stat-label">Уникальных клиентов</p>
+            <div class="analytics-content">
+                <h2 class="analytics-number">{{ sales_report.sales_data[0][3] if sales_report.sales_data else 0 }}</h2>
+                <p class="analytics-label">Уникальных клиентов</p>
             </div>
         </div>
     </div>
@@ -124,21 +124,18 @@
             </div>
             <div class="card-body">
                 {% for product in sales_report.top_products %}
-                <div class="d-flex align-items-center mb-3 p-3 rounded" style="background-color: #f8f9fa;">
-                    <div class="me-3">
-                        <div class="icon-circle icon-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1rem;">
-                            {{ loop.index }}
-                        </div>
+                <div class="analytics-product-item">
+                    <div class="analytics-product-rank">
+                        {{ loop.index }}
                     </div>
-                    <div class="flex-grow-1">
-                        <div class="fw-bold">{{ product[0] }}</div>
-                        <div class="text-muted small mb-2">
-                            <i class="fas fa-box me-1"></i>{{ product[1] }} шт.
-                            <i class="fas fa-dollar-sign ms-2 me-1"></i>{{ "%.0f"|format(product[2]) }}
+                    <div class="analytics-product-info">
+                        <div class="analytics-product-name">{{ product[0] }}</div>
+                        <div class="analytics-product-stats">
+                            <i class="fas fa-box"></i>{{ product[1] }} шт.
+                            <i class="fas fa-dollar-sign"></i>{{ "%.0f"|format(product[2]) }}
                         </div>
-                        <div class="progress" style="height: 6px;">
-                            <div class="progress-bar" role="progressbar" 
-                                 style="width: {{ (product[2] / sales_report.top_products[0][2] * 100) if sales_report.top_products else 0 }}%"></div>
+                        <div class="analytics-product-progress">
+                            <div class="analytics-progress-fill" data-width="{{ (product[2] / sales_report.top_products[0][2] * 100) if sales_report.top_products else 0 }}"></div>
                         </div>
                     </div>
                 </div>

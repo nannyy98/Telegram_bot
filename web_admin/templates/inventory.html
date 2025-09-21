@@ -7,73 +7,49 @@
 <!-- Сводка по складу -->
 <div class="row mb-4">
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-uppercase mb-1">
-                            Всего товаров
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold">{{ inventory_summary.total_products }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-boxes fa-2x text-light"></i>
-                    </div>
-                </div>
+        <div class="inventory-stat-card total-products">
+            <div class="stat-icon">
+                <i class="fas fa-boxes"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Всего товаров</div>
+                <div class="stat-value">{{ inventory_summary.total_products }}</div>
             </div>
         </div>
     </div>
     
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card-success">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-uppercase mb-1">
-                            Единиц на складе
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold">{{ inventory_summary.total_units }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-cubes fa-2x text-light"></i>
-                    </div>
-                </div>
+        <div class="inventory-stat-card total-units">
+            <div class="stat-icon">
+                <i class="fas fa-cubes"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Единиц на складе</div>
+                <div class="stat-value">{{ inventory_summary.total_units }}</div>
             </div>
         </div>
     </div>
     
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card-info">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-uppercase mb-1">
-                            Стоимость запасов
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold">${{ "%.2f"|format(inventory_summary.total_value) }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-dollar-sign fa-2x text-light"></i>
-                    </div>
-                </div>
+        <div class="inventory-stat-card total-value">
+            <div class="stat-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Стоимость запасов</div>
+                <div class="stat-value">${{ "%.2f"|format(inventory_summary.total_value) }}</div>
             </div>
         </div>
     </div>
     
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card-warning">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-uppercase mb-1">
-                            Требуют внимания
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold">{{ low_stock.low|length + low_stock.critical|length }}</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-exclamation-triangle fa-2x text-light"></i>
-                    </div>
-                </div>
+        <div class="inventory-stat-card attention-needed">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">Требуют внимания</div>
+                <div class="stat-value">{{ low_stock.low|length + low_stock.critical|length }}</div>
             </div>
         </div>
     </div>
@@ -206,7 +182,7 @@
                     {% for product in inventory_summary.top_value_products %}
                     <tr>
                         <td>
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                            <div class="ranking-badge">
                                 {{ loop.index }}
                             </div>
                         </td>

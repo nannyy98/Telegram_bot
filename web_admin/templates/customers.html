@@ -66,8 +66,7 @@
                         <td>
                             <div class="d-flex align-items-center">
                                 <div class="me-3">
-                                    <div class="icon-circle icon-primary text-white d-flex align-items-center justify-content-center" 
-                                         style="width: 45px; height: 45px;">
+                                    <div class="customer-avatar">
                                         <i class="fas fa-user"></i>
                                     </div>
                                 </div>
@@ -123,24 +122,24 @@
                         </td>
                         <td>
                             <div class="text-center">
-                                <div class="h5 mb-0 text-primary">{{ customer[5] }}</div>
-                                <small class="text-muted">заказов</small>
+                                <div class="customer-orders-count">{{ customer[5] }}</div>
+                                <small class="customer-orders-label">заказов</small>
                             </div>
                         </td>
                         <td>
-                            <div class="fw-bold text-success h5 mb-0">${{ "%.2f"|format(customer[6]) }}</div>
+                            <div class="customer-spent-amount">${{ "%.2f"|format(customer[6]) }}</div>
                             {% if customer[5] > 0 %}
-                                <small class="text-muted">
+                                <small class="customer-avg-order">
                                     Средний: ${{ "%.2f"|format(customer[6] / customer[5]) }}
                                 </small>
                             {% endif %}
                         </td>
                         <td>
                             {% if customer[7] %}
-                                <div class="fw-bold">{{ customer[7][:10] }}</div>
-                                <small class="text-muted">{{ customer[7][11:16] }}</small>
+                                <div class="customer-last-order-date">{{ customer[7][:10] }}</div>
+                                <small class="customer-last-order-time">{{ customer[7][11:16] }}</small>
                             {% else %}
-                                <span class="text-muted">
+                                <span class="customer-no-orders">
                                     <i class="fas fa-minus"></i> Нет заказов
                                 </span>
                             {% endif %}

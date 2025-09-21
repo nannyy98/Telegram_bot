@@ -158,21 +158,21 @@
             <div class="card-body">
                 {% if stats %}
                     {% for stat in stats %}
-                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded" style="background-color: #f8f9fa;">
-                        <div>
-                            <div class="fw-bold">{{ stat[0] }}</div>
-                            <small class="text-muted">
+                    <div class="post-stat-item">
+                        <div class="post-stat-info">
+                            <div class="post-stat-title">{{ stat[0] }}</div>
+                            <small class="post-stat-time">
                                 {% if stat[1] == 'morning' %}🌅 Утром
                                 {% elif stat[1] == 'afternoon' %}☀️ Днем
                                 {% elif stat[1] == 'evening' %}🌆 Вечером
                                 {% endif %}
                             </small>
                         </div>
-                        <div class="text-end">
-                            <div class="text-success fw-bold">{{ stat[2] }}</div>
-                            <small class="text-muted">отправлено</small>
+                        <div class="post-stat-numbers">
+                            <div class="post-stat-sent">{{ stat[2] }}</div>
+                            <small class="post-stat-sent-label">отправлено</small>
                             {% if stat[3] > 0 %}
-                                <div class="text-danger small">{{ stat[3] }} ошибок</div>
+                                <div class="post-stat-errors">{{ stat[3] }} ошибок</div>
                             {% endif %}
                         </div>
                     </div>

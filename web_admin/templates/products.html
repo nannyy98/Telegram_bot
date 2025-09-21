@@ -95,7 +95,7 @@
                             <span class="badge bg-secondary">{{ product[5] }}</span>
                         </td>
                         <td>
-                            <div class="fw-bold text-success h5 mb-0">${{ "%.2f"|format(product[2]) }}</div>
+                            <div class="product-price">${{ "%.2f"|format(product[2]) }}</div>
                         </td>
                         <td>
                             {% if product[3] == 0 %}
@@ -113,12 +113,12 @@
                             {% endif %}
                         </td>
                         <td>
-                            <div class="fw-bold">{{ product[6] }}</div>
-                            <small class="text-muted">продано</small>
+                            <div class="product-sales-count">{{ product[6] }}</div>
+                            <small class="product-sales-label">продано</small>
                         </td>
                         <td>
-                            <div class="fw-bold">{{ product[7] }}</div>
-                            <small class="text-muted">просмотров</small>
+                            <div class="product-views-count">{{ product[7] }}</div>
+                            <small class="product-views-label">просмотров</small>
                         </td>
                         <td>
                             {% if product[4] %}

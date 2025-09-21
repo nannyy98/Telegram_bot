@@ -7,22 +7,22 @@
 <!-- Статистические карточки -->
 <div class="row mb-4">
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="metric-card stat-card">
-            <div class="icon-circle icon-primary text-white mx-auto">
+        <div class="metric-card stat-card orders-today">
+            <div class="metric-icon">
                 <i class="fas fa-shopping-cart"></i>
             </div>
-            <div class="text-center">
-                <h2 class="stat-number">{{ today_stats[0] }}</h2>
-                <p class="stat-label">Заказов сегодня</p>
+            <div class="metric-content">
+                <h2 class="metric-number">{{ today_stats[0] }}</h2>
+                <p class="metric-label">Заказов сегодня</p>
                 {% if yesterday_stats[0] > 0 %}
                     {% set change = ((today_stats[0] - yesterday_stats[0]) / yesterday_stats[0] * 100) %}
-                    <small class="d-block mt-2">
+                    <small class="metric-change">
                         {% if change > 0 %}
-                            <i class="fas fa-arrow-up me-1"></i>+{{ "%.1f"|format(change) }}% от вчера
+                            <i class="fas fa-arrow-up"></i>+{{ "%.1f"|format(change) }}% от вчера
                         {% elif change < 0 %}
-                            <i class="fas fa-arrow-down me-1"></i>{{ "%.1f"|format(change) }}% от вчера
+                            <i class="fas fa-arrow-down"></i>{{ "%.1f"|format(change) }}% от вчера
                         {% else %}
-                            <i class="fas fa-minus me-1"></i>Без изменений
+                            <i class="fas fa-minus"></i>Без изменений
                         {% endif %}
                     </small>
                 {% endif %}
@@ -31,22 +31,22 @@
     </div>
     
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="metric-card stat-card-success">
-            <div class="icon-circle icon-success text-white mx-auto">
+        <div class="metric-card stat-card-success revenue-today">
+            <div class="metric-icon">
                 <i class="fas fa-dollar-sign"></i>
             </div>
-            <div class="text-center">
-                <h2 class="stat-number">${{ "%.0f"|format(today_stats[1]) }}</h2>
-                <p class="stat-label">Выручка сегодня</p>
+            <div class="metric-content">
+                <h2 class="metric-number">${{ "%.0f"|format(today_stats[1]) }}</h2>
+                <p class="metric-label">Выручка сегодня</p>
                 {% if yesterday_stats[1] > 0 %}
                     {% set change = ((today_stats[1] - yesterday_stats[1]) / yesterday_stats[1] * 100) %}
-                    <small class="d-block mt-2">
+                    <small class="metric-change">
                         {% if change > 0 %}
-                            <i class="fas fa-arrow-up me-1"></i>+{{ "%.1f"|format(change) }}% от вчера
+                            <i class="fas fa-arrow-up"></i>+{{ "%.1f"|format(change) }}% от вчера
                         {% elif change < 0 %}
-                            <i class="fas fa-arrow-down me-1"></i>{{ "%.1f"|format(change) }}% от вчера
+                            <i class="fas fa-arrow-down"></i>{{ "%.1f"|format(change) }}% от вчера
                         {% else %}
-                            <i class="fas fa-minus me-1"></i>Без изменений
+                            <i class="fas fa-minus"></i>Без изменений
                         {% endif %}
                     </small>
                 {% endif %}
@@ -55,30 +55,30 @@
     </div>
     
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="metric-card stat-card-info">
-            <div class="icon-circle icon-info text-white mx-auto">
+        <div class="metric-card stat-card-info total-customers">
+            <div class="metric-icon">
                 <i class="fas fa-users"></i>
             </div>
-            <div class="text-center">
-                <h2 class="stat-number">{{ total_stats[0] }}</h2>
-                <p class="stat-label">Всего клиентов</p>
-                <small class="d-block mt-2">
-                    <i class="fas fa-user-plus me-1"></i>{{ today_stats[2] }} новых сегодня
+            <div class="metric-content">
+                <h2 class="metric-number">{{ total_stats[0] }}</h2>
+                <p class="metric-label">Всего клиентов</p>
+                <small class="metric-change">
+                    <i class="fas fa-user-plus"></i>{{ today_stats[2] }} новых сегодня
                 </small>
             </div>
         </div>
     </div>
     
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="metric-card stat-card-warning">
-            <div class="icon-circle icon-warning text-white mx-auto">
+        <div class="metric-card stat-card-warning total-revenue">
+            <div class="metric-icon">
                 <i class="fas fa-chart-line"></i>
             </div>
-            <div class="text-center">
-                <h2 class="stat-number">${{ "%.0f"|format(total_stats[2]) }}</h2>
-                <p class="stat-label">Общая выручка</p>
-                <small class="d-block mt-2">
-                    <i class="fas fa-shopping-bag me-1"></i>{{ total_stats[1] }} заказов всего
+            <div class="metric-content">
+                <h2 class="metric-number">${{ "%.0f"|format(total_stats[2]) }}</h2>
+                <p class="metric-label">Общая выручка</p>
+                <small class="metric-change">
+                    <i class="fas fa-shopping-bag"></i>{{ total_stats[1] }} заказов всего
                 </small>
             </div>
         </div>
@@ -250,21 +250,18 @@
             </div>
             <div class="card-body">
                 {% for product in top_products %}
-                <div class="d-flex align-items-center mb-3 p-2 rounded" style="background-color: #f8f9fa;">
-                    <div class="me-3">
-                        <div class="icon-circle icon-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1rem;">
-                            {{ loop.index }}
-                        </div>
+                <div class="top-product-item">
+                    <div class="product-rank">
+                        {{ loop.index }}
                     </div>
-                    <div class="flex-grow-1">
-                        <div class="fw-bold">{{ product[0] }}</div>
-                        <div class="text-muted small">
-                            <i class="fas fa-box me-1"></i>{{ product[1] }} шт.
-                            <i class="fas fa-dollar-sign ms-2 me-1"></i>{{ "%.0f"|format(product[2]) }}
+                    <div class="product-info">
+                        <div class="product-name">{{ product[0] }}</div>
+                        <div class="product-stats">
+                            <i class="fas fa-box"></i>{{ product[1] }} шт.
+                            <i class="fas fa-dollar-sign"></i>{{ "%.0f"|format(product[2]) }}
                         </div>
-                        <div class="progress mt-2" style="height: 4px;">
-                            <div class="progress-bar" role="progressbar" 
-                                 style="width: {{ (product[2] / top_products[0][2] * 100) if top_products else 0 }}%"></div>
+                        <div class="product-progress">
+                            <div class="progress-fill" data-width="{{ (product[2] / top_products[0][2] * 100) if top_products else 0 }}"></div>
                         </div>
                     </div>
                 </div>
@@ -283,12 +280,16 @@
             <div class="card-body">
                 <div class="row text-center">
                     <div class="col-6 mb-3">
-                        <div class="h3 text-primary">{{ "%.1f"|format((today_stats[1] / today_stats[0]) if today_stats[0] > 0 else 0) }}</div>
-                        <div class="text-muted small">Средний чек сегодня</div>
+                        <div class="summary-metric">
+                            <div class="summary-number">{{ "%.1f"|format((today_stats[1] / today_stats[0]) if today_stats[0] > 0 else 0) }}</div>
+                            <div class="summary-label">Средний чек сегодня</div>
+                        </div>
                     </div>
                     <div class="col-6 mb-3">
-                        <div class="h3 text-success">{{ "%.1f"|format((today_stats[0] / yesterday_stats[0] * 100) if yesterday_stats[0] > 0 else 0) }}%</div>
-                        <div class="text-muted small">Рост заказов</div>
+                        <div class="summary-metric">
+                            <div class="summary-number">{{ "%.1f"|format((today_stats[0] / yesterday_stats[0] * 100) if yesterday_stats[0] > 0 else 0) }}%</div>
+                            <div class="summary-label">Рост заказов</div>
+                        </div>
                     </div>
                 </div>
                 
