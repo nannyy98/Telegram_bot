@@ -5,7 +5,6 @@
 
 import sqlite3
 import os
-from datetime import datetime
 
 def fix_database_issues():
     """Исправление проблем с базой данных"""

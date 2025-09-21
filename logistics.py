@@ -2,11 +2,7 @@
 Модуль логистики и доставки
 """
 
-import json
-import urllib.request
-import urllib.parse
 from datetime import datetime, timedelta
-from utils import format_date, format_price
 
 class LogisticsManager:
     def __init__(self, db):

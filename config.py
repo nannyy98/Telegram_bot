@@ -2,7 +2,6 @@
 Конфигурация для Telegram бота интернет-магазина
 """
 import os
-from datetime import timedelta
 
 # Конфигурация окружения
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')

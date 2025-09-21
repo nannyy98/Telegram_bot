@@ -4,7 +4,6 @@
 
 import threading
 import time
-from utils import format_date
 from logger import logger
 
 # Простой планировщик без внешних зависимостей

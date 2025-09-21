@@ -2,9 +2,8 @@
 AI функции для телеграм-бота
 """
 
-import json
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from collections import Counter
 
 class AIRecommendationEngine:

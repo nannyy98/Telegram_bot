@@ -5,10 +5,6 @@
 import json
 import urllib.request
 import urllib.parse
-import hashlib
-import hmac
-import time
-from datetime import datetime
 
 class PaymentProcessor:
     def __init__(self):

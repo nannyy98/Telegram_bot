@@ -7,8 +7,6 @@ import sys
 import uuid
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, send_from_directory
-from werkzeug.utils import secure_filename
-import json
 
 # Добавляем путь к модулям бота
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

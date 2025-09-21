@@ -1,3 +1,3 @@
 // run `node index.js` in the terminal
 
-console.log(`Hello Node.js v${process.versions.node}!`);
+// Bot is running via Python, this file is not used

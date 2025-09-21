@@ -3,7 +3,7 @@
 """
 
 from datetime import datetime, timedelta
-from utils import format_date, format_price, log_user_action
+from utils import format_date, format_price
 import threading
 import time
 

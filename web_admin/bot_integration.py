@@ -7,7 +7,7 @@ import os
 import json
 import urllib.request
 import urllib.parse
-from datetime import datetime
+import time
 
 # Добавляем путь к модулям бота
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

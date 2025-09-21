@@ -3,8 +3,7 @@
 """
 
 from datetime import datetime, timedelta
-from utils import format_price, format_date
-import json
+from utils import format_price
 
 class AnalyticsManager:
     def __init__(self, db):

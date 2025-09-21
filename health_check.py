@@ -5,9 +5,8 @@
 import time
 import threading
 import psutil
-import sqlite3
-from datetime import datetime, timedelta
-from config import DATABASE_CONFIG, MONITORING_CONFIG
+from datetime import datetime
+from config import MONITORING_CONFIG
 from logger import logger
 
 class HealthMonitor:

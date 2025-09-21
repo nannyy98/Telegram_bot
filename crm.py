@@ -2,7 +2,7 @@
 CRM модуль для управления клиентами
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from utils import format_price, format_date
 
 class CRMManager:

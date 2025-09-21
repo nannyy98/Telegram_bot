@@ -7,7 +7,7 @@ import logging.handlers
 import os
 import sys
 from datetime import datetime
-from config import LOGGING_CONFIG, ENVIRONMENT
+from config import LOGGING_CONFIG
 
 class ProductionLogger:
     def __init__(self):

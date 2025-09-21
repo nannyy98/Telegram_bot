@@ -4,7 +4,6 @@
 
 from datetime import datetime, timedelta
 import random
-import string
 
 class PromotionManager:
     def __init__(self, db):

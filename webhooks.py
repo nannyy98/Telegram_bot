@@ -3,10 +3,6 @@
 """
 
 import json
-import urllib.request
-import urllib.parse
-import hashlib
-import hmac
 from datetime import datetime
 
 class WebhookManager:

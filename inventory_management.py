@@ -4,7 +4,6 @@
 
 from datetime import datetime, timedelta
 from utils import format_price, format_date
-import json
 
 class InventoryManager:
     def __init__(self, db):

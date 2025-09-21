@@ -159,7 +159,7 @@ def get_user_language(db, telegram_id):
         user_data = db.get_user_by_telegram_id(telegram_id)
         if user_data:
             return user_data[0][5]  # language поле
-    except:
+    except Exception:
         pass
     return 'ru'  # По умолчанию русский
 

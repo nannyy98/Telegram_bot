@@ -13,7 +13,7 @@ import threading
 from database import DatabaseManager
 from handlers import MessageHandler
 from notifications import NotificationManager
-from utils import log_user_action, format_date
+from utils import format_date
 from payments import PaymentProcessor
 from logistics import LogisticsManager
 from promotions import PromotionManager
@@ -22,7 +22,7 @@ from logger import logger
 from health_check import HealthMonitor
 from database_backup import DatabaseBackup
 from scheduled_posts import ScheduledPostsManager
-from config import BOT_CONFIG, SECURITY_CONFIG, ENVIRONMENT
+from config import BOT_CONFIG
 
 # Импорты с обработкой ошибок
 try:
@@ -226,7 +226,7 @@ class TelegramShopBot:
                 logger.error(f"Ошибка принудительной перезагрузки: {e}")
                 try:
                     os.remove(force_reload_flag)
-                except:
+                except Exception:
                     pass
         
         # Проверяем обычное обновление
@@ -253,7 +253,7 @@ class TelegramShopBot:
                 # Удаляем поврежденный флаг
                 try:
                     os.remove(update_flag_file)
-                except:
+                except Exception:
                     pass
     
     def full_data_reload(self):

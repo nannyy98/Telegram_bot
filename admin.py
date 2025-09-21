@@ -1,15 +1,12 @@
 """
 Админ-панель для телеграм-бота интернет-магазина
 """
-
 from datetime import datetime, timedelta
-from utils import format_price, format_date, log_user_action
+from utils import format_price, format_date
 from keyboards import create_admin_keyboard, create_confirmation_keyboard
-try:
+    create_notifications_keyboard,
     from localization import t
 except ImportError:
-    def t(key, **kwargs):
-        return key
 
 class AdminHandler:
     def __init__(self, bot, db):
@@ -66,7 +63,7 @@ class AdminHandler:
                 (telegram_id,)
             )
             return admin_check and admin_check[0][0] == 1
-        except:
+        except Exception as e:
             return False
     
     def show_admin_panel(self, chat_id):
